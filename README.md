@@ -27,7 +27,7 @@ This userscript **forces 5 videos per row** across the homepage and channel view
 ## 📦 Installation
 
 1. Install [Tampermonkey](https://www.tampermonkey.net/) (or similar)
-2. Click 👉 **[Install the Script](*/YT_5VideosPerRow_v2.user.js)**  
+2. Click 👉 **[Install the Script](YT_5VideosPerRow_v2.user.js)**  
 3. Refresh YouTube and enjoy the upgrade!
 
 ---
