@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         YouTube 5 Videos Per Row V2
 // @namespace    http://tampermonkey.net/
-// @version      1.4
-// @description  Forces YouTube to always show 5 videos per row, including correcting pre-rendered top rows reliably every time
+// @version      1.5
+// @description  Forces 5 videos per row on YouTube without resetting scroll position or causing layout jumps.
 // @author       Dean
 // @match        https://www.youtube.com/*
 // @grant        GM_addStyle
@@ -37,7 +37,7 @@
     }
     `;
 
-    // Inject CSS
+    // Inject static CSS
     if (typeof GM_addStyle !== 'undefined') {
         GM_addStyle(css);
     } else {
@@ -46,21 +46,11 @@
         document.head.appendChild(style);
     }
 
-    function forceTopRowsFix() {
-        const gridRenderers = document.querySelectorAll('ytd-rich-grid-renderer');
-        gridRenderers.forEach((renderer, index) => {
-            renderer.style.setProperty('--ytd-rich-grid-items-per-row', '5', 'important');
-
-            if (index < 3) {
-                renderer.style.display = 'none';
-                renderer.offsetHeight; // trigger reflow
-                renderer.style.display = '';
-            }
-        });
-    }
-
+    // Apply styles to new items without forcing reflow
     function applyFixes() {
-        forceTopRowsFix();
+        document.querySelectorAll('ytd-rich-grid-renderer').forEach(renderer => {
+            renderer.style.setProperty('--ytd-rich-grid-items-per-row', '5', 'important');
+        });
 
         document.querySelectorAll('ytd-rich-grid-row, #contents.ytd-rich-grid-row').forEach(row => {
             row.style.setProperty('display', 'contents', 'important');
@@ -72,21 +62,17 @@
         });
     }
 
-    // Repeated correction interval for early-rendered rows
-    let retryCount = 0;
-    const retryInterval = setInterval(() => {
-        applyFixes();
-        retryCount++;
+    // Initial fix
+    applyFixes();
 
-        // Stop after 2.5 seconds (~5 tries)
-        if (retryCount > 5) {
-            clearInterval(retryInterval);
+    // Observe DOM for new rows loading
+    const observer = new MutationObserver(mutations => {
+        for (const mutation of mutations) {
+            if ([...mutation.addedNodes].some(n => n.nodeName.includes('YTD-RICH-GRID'))) {
+                applyFixes(); // Only apply without reflow
+                break;
+            }
         }
-    }, 500);
-
-    // Observe dynamic changes (scrolling, page navigation)
-    const observer = new MutationObserver(() => {
-        applyFixes();
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
