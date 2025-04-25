@@ -24,13 +24,6 @@ This userscript **forces 5 videos per row** across the homepage and channel view
 
 ---
 
-## 🚀 Demo
-
-> 🔁 Smooth auto-fixing as you scroll and navigate  
-> ![YouTube 5 Videos Per Row Demo](demo/demo.gif)
-
----
-
 ## 📦 Installation
 
 1. Install [Tampermonkey](https://www.tampermonkey.net/) (or similar)
